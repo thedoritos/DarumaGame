@@ -9,7 +9,7 @@ public class DarumaCreatorScript : MonoBehaviour {
 
 	void SetupObjects (int level) {
 
-		float bodyInterval = 0.11f;
+		float bodyInterval = 0.21f;
 
 		// Setup bodies
 		for (int i = 0; i < level; i++) {
@@ -30,12 +30,12 @@ public class DarumaCreatorScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetButtonUp ("Jump")) {
-			Debug.Log("Create object from prefab \"" + bodyPrefab.name + "\".");
-
-			Instantiate(bodyPrefab, this.transform.position, this.transform.rotation);
-			this.transform.Translate(0.0f, 0.1f, 0.0f);
-		}
+//		if (Input.GetButtonUp ("Jump")) {
+//			Debug.Log("Create object from prefab \"" + bodyPrefab.name + "\".");
+//
+//			Instantiate(bodyPrefab, this.transform.position, this.transform.rotation);
+//			this.transform.Translate(0.0f, 0.1f, 0.0f);
+//		}
 	}
 
 }
