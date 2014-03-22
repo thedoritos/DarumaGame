@@ -7,25 +7,42 @@ public class DarumaCreatorScript : MonoBehaviour {
 	public GameObject bodyPrefab;
 	public int level;
 
-	void SetupObjects (int level) {
+	public void CreateObjects (int level) {
 
 		float bodyInterval = 0.21f;
 
-		// Setup bodies
+		// Setup bodies.
 		for (int i = 0; i < level; i++) {
 			Vector3 pos = new Vector3(0.0f, bodyInterval * (i + 1), 0.0f);
-			Instantiate(bodyPrefab, pos, new Quaternion());
+			GameObject body = (GameObject) Instantiate(bodyPrefab, pos, new Quaternion());
+			body.tag = "DarumaBody";
 		}
 
-		// Setup head
+		// Setup head.
 		Vector3 headPos = new Vector3(0.0f, bodyInterval * (level + 2), 0.0f);
-		Instantiate(headPrefab, headPos, new Quaternion());
+		GameObject head = (GameObject) Instantiate(headPrefab, headPos, new Quaternion());
+		head.tag = "DarumaHead";
+	}
+
+	public void DestroyObjects() {
+
+		// Destroy bodies.
+		GameObject[] bodies = GameObject.FindGameObjectsWithTag("DarumaBody");
+		foreach (GameObject body in bodies) {
+			Destroy (body);
+		}
+
+		// Destroy head.
+		GameObject head = GameObject.FindWithTag("DarumaHead");
+		if (head != null) {
+			Destroy (head);
+		}
 	}
 
 	// Use this for initialization
 	void Start () {
-		Debug.Log ("Create Darumas for level \'" + level + "\'.");
-		this.SetupObjects (level);
+//		Debug.Log ("Create Darumas for level \'" + level + "\'.");
+//		this.SetupObjects (level);
 	}
 	
 	// Update is called once per frame
