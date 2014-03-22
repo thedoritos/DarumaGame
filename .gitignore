@@ -41,4 +41,7 @@ Session.vim
 /*.pidb
 /*.booproj
 
+### Other files
 
+# Ignore Xcode proj & apk.
+Build/
