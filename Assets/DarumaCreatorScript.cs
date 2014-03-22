@@ -7,6 +7,10 @@ public class DarumaCreatorScript : MonoBehaviour {
 	public GameObject bodyPrefab;
 	public int level;
 
+	public void CreateObjects () {
+		this.CreateObjects(level);
+	}
+
 	public void CreateObjects (int level) {
 
 		float bodyInterval = 0.21f;
@@ -29,13 +33,13 @@ public class DarumaCreatorScript : MonoBehaviour {
 		// Destroy bodies.
 		GameObject[] bodies = GameObject.FindGameObjectsWithTag("DarumaBody");
 		foreach (GameObject body in bodies) {
-			Destroy (body);
+			Destroy(body);
 		}
 
 		// Destroy head.
 		GameObject head = GameObject.FindWithTag("DarumaHead");
 		if (head != null) {
-			Destroy (head);
+			Destroy(head);
 		}
 	}
 
