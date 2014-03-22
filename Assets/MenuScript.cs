@@ -14,15 +14,15 @@ public class MenuScript : MonoBehaviour {
 	}
 
 	void OnGUI () {
-		GUI.Box (new Rect (10, 10, 100, 90), "Reset");
-		if (GUI.Button(new Rect(20, 40, 80, 20), "Application")) {
+		GUI.Box (new Rect (10, 10, 170, 74), "Reset");
+		if (GUI.Button(new Rect(20, 30, 70, 44), "Game")) {
 			Debug.Log("Reset Applicatioin");
 
 			GameObject game = GameObject.Find("Game");
 			GameScript gameModel = (GameScript) game.GetComponent(typeof(GameScript));
 			gameModel.ResetAll();
 		}
-		if (GUI.Button(new Rect(20, 70, 80, 20), "Hammer")) {
+		if (GUI.Button(new Rect(100, 30, 70, 44), "Hammer")) {
 			Debug.Log("Reset Hammer");
 
 			GameObject game = GameObject.Find("Game");
