@@ -14,8 +14,12 @@ public class DarumaHeadScript : MonoBehaviour {
 	void Update () {
 		// TODO: move to GameScript
 		// because this is game logic not head logic
-		if (OnFloor () && IsStopping () && IsStanding ()) {
-			Debug.Log("Game Cleared !!!");
+		if (this.OnFloor() && this.IsStopping()) {
+			if (this.IsStanding()) {
+				Debug.Log("Game Cleared !!!");
+			} else {
+				Debug.Log("Game Over...");
+			}
 		}
 	}
 
