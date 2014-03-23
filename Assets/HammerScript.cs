@@ -31,11 +31,11 @@ public class HammerScript : MonoBehaviour {
 		float value = Input.GetAxis ("LargeBang");
 
 //		Debug.Log ("the input value = " + value);
-//		if (value == 0.0) {
+		if (value == 0.0) {
 //			this.ResetPosition ();
-//		} else {
-//			Vector3 force = Vector3.left;
-//			this.rigidbody.AddForce (force * forceAmount, ForceMode.VelocityChange);
-//		}
+		} else {
+			Vector3 force = Vector3.left;
+			this.rigidbody.AddForce (force * forceAmount, ForceMode.VelocityChange);
+		}
 	}
 }

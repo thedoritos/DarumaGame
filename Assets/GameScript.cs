@@ -28,6 +28,10 @@ public class GameScript : MonoBehaviour {
 	}
 
 	public void ResetAll() {
+		GameObject menu = GameObject.Find("Menu");
+		MenuScript menuModel = (MenuScript) menu.GetComponent(typeof(MenuScript));
+		menuModel.dismissDialog();
+
 		GameObject darumaCreator = GameObject.Find("DarumaCreator");
 		DarumaCreatorScript darumaCreatorScript = (DarumaCreatorScript)darumaCreator.GetComponent (typeof(DarumaCreatorScript));
 		darumaCreatorScript.DestroyObjects();
@@ -44,8 +48,40 @@ public class GameScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		// Check game clear & over.
+		GameObject head = GameObject.FindWithTag("DarumaHead");
+		DarumaHeadScript headModel = (DarumaHeadScript)head.GetComponent(typeof(DarumaHeadScript));
+		if (headModel.OnFloor() && headModel.IsStopping()) {
+			if (headModel.IsStanding()) {
+				Debug.Log("Game Cleared !!!");
+				
+				GameObject menu = GameObject.Find("Menu");
+				MenuScript menuModel = (MenuScript) menu.GetComponent(typeof(MenuScript));
+				menuModel.showDialog("Finish", "Game Cleared !!!");
+				
+			} else {
+				Debug.Log("Game Over...");
+				
+				GameObject menu = GameObject.Find("Menu");
+				MenuScript menuModel = (MenuScript) menu.GetComponent(typeof(MenuScript));
+				menuModel.showDialog("Finish", "Game Over...");
+			}
+		}
 
-		// Update acceleration input.
+		// Input keys (for debug)
+		if (Input.GetKeyUp ("h")) {
+			this.ResetHammer();
+			return;
+		} else if (Input.GetKeyUp("g")) {
+			this.ResetAll();
+			return;
+		} else if (Input.GetKeyUp("j")) {
+			return;
+		} else if (Input.GetKeyUp("f")) {
+			return;
+		}
+
+		// Input accelerations.
 		Vector3 inputAccel = Input.acceleration;
 		Vector3 lowPassedAccel = LowPassFilteredAcceleration();
 		if (Mathf.Abs(inputAccel.x - lowPassedAccel.x) > AccelerometerThreshold) {
@@ -53,6 +89,7 @@ public class GameScript : MonoBehaviour {
 			hitFlag  = true;
 		}
 
+		// Trigger Hammer Action.
 		// TODO: think better implementation
 		// + Not using flag variable
 		// + Not getting object by name
@@ -70,7 +107,7 @@ public class GameScript : MonoBehaviour {
 		
 		hitDelay = (hitDelay <= 0) ? 0 : hitDelay - 1;
 	}
-	
+
 	Vector3 LowPassFilteredAcceleration() {
 		lowPassValue = Vector3.Lerp (lowPassValue, Input.acceleration, LowPassFilterFactor);
 		return lowPassValue;
