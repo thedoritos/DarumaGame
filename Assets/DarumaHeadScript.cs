@@ -12,26 +12,18 @@ public class DarumaHeadScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		// TODO: move to GameScript
-		// because this is game logic not head logic
-		if (this.OnFloor() && this.IsStopping()) {
-			if (this.IsStanding()) {
-				Debug.Log("Game Cleared !!!");
-			} else {
-				Debug.Log("Game Over...");
-			}
-		}
+
 	}
 
-	bool OnFloor () {
+	public bool OnFloor () {
 		return onFloor;
 	}
 
-	bool IsStopping () {
+	public bool IsStopping () {
 		return this.rigidbody.velocity.magnitude < 0.01f;
 	}
 
-	bool IsStanding () {
+	public bool IsStanding () {
 		return Mathf.Abs (this.rigidbody.rotation.x) < 0.1f
 			&& Mathf.Abs (this.rigidbody.rotation.z) < 0.1f;
 	}
