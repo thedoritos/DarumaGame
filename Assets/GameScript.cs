@@ -53,6 +53,7 @@ public class GameScript : MonoBehaviour {
 			hitFlag  = true;
 		}
 
+		// Trigger Hammer Action.
 		// TODO: think better implementation
 		// + Not using flag variable
 		// + Not getting object by name
