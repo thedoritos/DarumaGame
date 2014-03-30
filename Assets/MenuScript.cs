@@ -32,7 +32,7 @@ public class MenuScript : MonoBehaviour {
 
 			GameObject game = GameObject.Find("Game");
 			GameScript gameModel = (GameScript) game.GetComponent(typeof(GameScript));
-			gameModel.ResetHammer();
+			gameModel.ResetHammer(GameScript.HammerDirection.RIGHT);
 		}
 
 		// Show dialog.
