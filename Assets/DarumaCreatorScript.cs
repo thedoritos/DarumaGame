@@ -45,18 +45,12 @@ public class DarumaCreatorScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-//		Debug.Log ("Create Darumas for level \'" + level + "\'.");
-//		this.SetupObjects (level);
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
-//		if (Input.GetButtonUp ("Jump")) {
-//			Debug.Log("Create object from prefab \"" + bodyPrefab.name + "\".");
-//
-//			Instantiate(bodyPrefab, this.transform.position, this.transform.rotation);
-//			this.transform.Translate(0.0f, 0.1f, 0.0f);
-//		}
+
 	}
 
 }

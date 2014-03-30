@@ -3,6 +3,11 @@ using System.Collections;
 
 public class GameScript : MonoBehaviour {
 
+	public enum HammerDirection {
+		LEFT,
+		RIGHT,
+	}
+
 	static float AccelerometerUpdateInterval = 1.0f / 60.0f;
 	static float LowPassKernelWidthInSeconds = 1.0f;
 	
@@ -36,16 +41,27 @@ public class GameScript : MonoBehaviour {
 		DarumaCreatorScript darumaCreatorScript = (DarumaCreatorScript)darumaCreator.GetComponent (typeof(DarumaCreatorScript));
 		darumaCreatorScript.DestroyObjects();
 		
-		this.ResetHammer();
+		this.ResetHammer(HammerDirection.RIGHT);
 		this.Setup();
 	}
 
-	public void ResetHammer() {
+	public void ResetHammer(HammerDirection hammerDirection) {
 		GameObject hammer = GameObject.Find("Hammer");
 		HammerScript hammerModel = (HammerScript) hammer.GetComponent(typeof(HammerScript));
-		hammerModel.ResetPosition();
+
+		switch (hammerDirection) {
+		case HammerDirection.LEFT:
+			hammerModel.ResetPosition(HammerScript.Direction.LEFT);
+			break;
+		case HammerDirection.RIGHT:
+			hammerModel.ResetPosition(HammerScript.Direction.RIGHT);
+			break;
+		default:
+			Debug.Log("Unexpected direction " + hammerDirection);
+			break;
+		}
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 		// Check game clear & over.
@@ -68,9 +84,26 @@ public class GameScript : MonoBehaviour {
 			}
 		}
 
+		// Input touches
+		if (Input.touchCount == 1) {
+			Touch touch = Input.GetTouch (0);
+			if (touch.phase == TouchPhase.Began) {
+				if (touch.position.x < Screen.width * 0.5f) {
+					Debug.Log("Left side touched up.");
+					this.ResetHammer(HammerDirection.LEFT);
+				} else {
+					Debug.Log("Right side touched up.");
+					this.ResetHammer(HammerDirection.RIGHT);
+				}
+			}
+		}
+
 		// Input keys (for debug)
-		if (Input.GetKeyUp ("h")) {
-			this.ResetHammer();
+		if (Input.GetKeyUp ("l")) {
+			this.ResetHammer(HammerDirection.RIGHT);
+			return;
+		} else if (Input.GetKeyUp("s")) {
+			this.ResetHammer(HammerDirection.LEFT);
 			return;
 		} else if (Input.GetKeyUp("g")) {
 			this.ResetAll();
