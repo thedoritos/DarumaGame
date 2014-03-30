@@ -3,12 +3,21 @@ using System.Collections;
 
 public class MenuScript : MonoBehaviour {
 
-	string dialogTitle   = "";
-	string dialogMessage = "";
+	[SerializeField]
+	bool debugMode;
 
+	public GUIStyle titleStyle;
+	public GUIStyle defaultInteractiveStyle;
+	public GUIStyle defaultStaticStyle;
+	public GUIStyle gameClearStyle;
+	public GUIStyle gameOverStyle;
+
+	GameScript gameModel;
+	
 	// Use this for initialization
 	void Start () {
-
+		GameObject game = GameObject.Find("Game");
+		gameModel = (GameScript) game.GetComponent(typeof(GameScript));
 	}
 
 	// Update is called once per frame
@@ -17,45 +26,78 @@ public class MenuScript : MonoBehaviour {
 	}
 
 	void OnGUI () {
-
-		// Show reset buttons.
-		GUI.Box (new Rect (10, 10, 170, 74), "Reset");
-		if (GUI.Button(new Rect(20, 30, 70, 44), "Game")) {
-			Debug.Log("Reset Applicatioin");
-
-			GameObject game = GameObject.Find("Game");
-			GameScript gameModel = (GameScript) game.GetComponent(typeof(GameScript));
-			gameModel.ResetAll();
-		}
-		if (GUI.Button(new Rect(100, 30, 70, 44), "Hammer")) {
-			Debug.Log("Reset Hammer");
-
-			GameObject game = GameObject.Find("Game");
-			GameScript gameModel = (GameScript) game.GetComponent(typeof(GameScript));
-			gameModel.ResetHammer(GameScript.HammerDirection.RIGHT);
+		// Forgive me for switching.
+		// Since this is prototyping and the number fo the states is not too much.
+		switch (gameModel.State) {
+		case GameScript.GameState.TITLE:
+			this.OnTitleGUI();
+			break;
+		case GameScript.GameState.PLAYING:
+			this.OnPlayGUI();
+			break;
+		case GameScript.GameState.CLEARED:
+		case GameScript.GameState.OVERED:
+			this.OnResultGUI();
+			break;
 		}
 
-		// Show dialog.
-		if (dialogTitle.Length != 0) {
-			float width  = 120;
-			float height = 120;
-			GUI.Box(new Rect(Screen.width  * 0.5f - width  * 0.5f,
-			                 Screen.height * 0.5f - height * 0.5f,
-			                 width, height), dialogTitle);
-			
-			GUI.Label(new Rect(Screen.width  * 0.5f - width  * 0.5f + 10,
-			                   Screen.height * 0.5f - height * 0.5f + 20,
-			                   width - 20, height - 40), dialogMessage);
+		if (debugMode) this.OnDebugGUI ();
+	}
+	
+	private void OnTitleGUI () {
+		float mainPadding = 44.0f;
+		Rect labelRect = new Rect(mainPadding, mainPadding + 60.0f, Screen.width - mainPadding * 2, 180.0f);
+		Rect buttonRect = new Rect(mainPadding, Screen.height - (mainPadding + 180.0f), Screen.width - mainPadding * 2, 84.0f);
+
+		GUI.Label(labelRect, "FIREMAN", titleStyle);
+
+		if (GUI.Button(buttonRect, "Play", defaultInteractiveStyle)) {
+			gameModel.StartGame();
 		}
 	}
 
-	public void showDialog(string title, string message) {
-		dialogTitle = title;
-		dialogMessage = message;
+	private void OnPlayGUI () {
+		// Following UI will be implemented.
+		// - Pause button
+		// - Quit game button
+		// - Resume game button
+		// - Level information labels
 	}
 
-	public void dismissDialog() {
-		dialogTitle = "";
-		dialogMessage = "";
+	private void OnResultGUI () {
+		Rect resultLabelRect = new Rect(44.0f, Screen.height * 0.5f - 180.0f, Screen.width - 88.0f, 128.0f);
+
+		switch (gameModel.State) {
+		case GameScript.GameState.CLEARED:
+			GUI.Label (resultLabelRect, "Clear!!!", gameClearStyle);
+			break;
+		case GameScript.GameState.OVERED:
+			GUI.Label (resultLabelRect, "GameOver...", gameOverStyle);
+			break;
+		default:
+			Debug.Log("Game is not finished.");
+			break;
+		}
+
+		Rect retryButtonRect = new Rect(44.0f, Screen.height - 224.0f, Screen.width * 0.5f - 66.0f, 88.0f);
+		Rect quitButtonRect   = new Rect(retryButtonRect.xMax + 44.0f, retryButtonRect.yMin, retryButtonRect.width, retryButtonRect.height);
+
+		if (GUI.Button(retryButtonRect, "Retry", defaultInteractiveStyle)) {
+			gameModel.StartGame();
+		}
+		if (GUI.Button(quitButtonRect, "Quit", defaultInteractiveStyle)) {
+			gameModel.QuitGame();
+		}
+	}
+
+	private void OnDebugGUI () {
+		Rect resetButtonRect   = new Rect(22.0f, 22.0f, 88.0f, 88.0f);
+		Rect restartButtonRect = new Rect(resetButtonRect.xMax + 22.0f, 22.0f, 88.0f, 88.0f);
+		if (GUI.Button (resetButtonRect, "Exit")) {
+			gameModel.QuitGame();
+		}
+		if (GUI.Button (restartButtonRect, "ReStart")) {
+			gameModel.StartGame();
+		}
 	}
 }

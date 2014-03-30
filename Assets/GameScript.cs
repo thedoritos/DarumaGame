@@ -3,85 +3,110 @@ using System.Collections;
 
 public class GameScript : MonoBehaviour {
 
-	public enum HammerDirection {
+	public enum GameState {
+		TITLE,
+		PLAYING,
+		PAUSING,
+		CLEARED,
+		OVERED,
+	}
+
+	public GameState State { get; private set;}
+
+	public enum HammerSetPosition {
 		LEFT,
 		RIGHT,
 	}
 
-	static float AccelerometerUpdateInterval = 1.0f / 60.0f;
-	static float LowPassKernelWidthInSeconds = 1.0f;
-	
+	[SerializeField]
+	const int DefaultGameLevel = 7;
+
+	[SerializeField]
 	static float AccelerometerThreshold = 1.0f;
 	
-	float   LowPassFilterFactor = AccelerometerUpdateInterval / LowPassKernelWidthInSeconds;
-	Vector3 lowPassValue = Vector3.zero;
+	static float AccelerometerUpdateInterval = 1.0f / 60.0f;
+	static float LowPassKernelWidthInSeconds = 1.0f;
+	static float LowPassFilterFactor = AccelerometerUpdateInterval / LowPassKernelWidthInSeconds;
+
+	Vector3 lowPassValue;
 	
 	float hitAccel = 0.0f;
 	bool  hitFlag  = false;
 	int   hitDelay = 0;
-	
+
+	HammerScript hammerModel;
+
 	// Use this for initialization
 	void Start () {
-		lowPassValue = Input.acceleration;
-		this.Setup();
-	}
-
-	public void Setup() {
-		GameObject darumaCreator = GameObject.Find("DarumaCreator");
-		DarumaCreatorScript darumaCreatorScript = (DarumaCreatorScript)darumaCreator.GetComponent (typeof(DarumaCreatorScript));
-		darumaCreatorScript.CreateObjects(7);
-	}
-
-	public void ResetAll() {
-		GameObject menu = GameObject.Find("Menu");
-		MenuScript menuModel = (MenuScript) menu.GetComponent(typeof(MenuScript));
-		menuModel.dismissDialog();
-
-		GameObject darumaCreator = GameObject.Find("DarumaCreator");
-		DarumaCreatorScript darumaCreatorScript = (DarumaCreatorScript)darumaCreator.GetComponent (typeof(DarumaCreatorScript));
-		darumaCreatorScript.DestroyObjects();
-		
-		this.ResetHammer(HammerDirection.RIGHT);
-		this.Setup();
-	}
-
-	public void ResetHammer(HammerDirection hammerDirection) {
+		// Keep references.
 		GameObject hammer = GameObject.Find("Hammer");
-		HammerScript hammerModel = (HammerScript) hammer.GetComponent(typeof(HammerScript));
+		hammerModel = (HammerScript) hammer.GetComponent(typeof(HammerScript));
 
-		switch (hammerDirection) {
-		case HammerDirection.LEFT:
-			hammerModel.ResetPosition(HammerScript.Direction.LEFT);
-			break;
-		case HammerDirection.RIGHT:
-			hammerModel.ResetPosition(HammerScript.Direction.RIGHT);
-			break;
-		default:
-			Debug.Log("Unexpected direction " + hammerDirection);
-			break;
+		// Setup values.
+		lowPassValue = Input.acceleration;
+	}
+
+	//
+	// GAME LIFECYCLES
+	//
+	public void StartGame(int gameLevel = DefaultGameLevel) {
+		if (State == GameState.PLAYING) {
+			Debug.Log("State already has been changed to " + State);
+			return;
 		}
+
+		this.ResetDarumas(gameLevel);
+		this.ResetHammer();
+
+		State = GameState.PLAYING;
+	}
+
+	public void PauseGame() {
+		Debug.Log("Not implemented.");
+	}
+
+	public void ResumeGame() {
+		Debug.Log("Not implemented.");
+	}
+
+	public void QuitGame() {
+		if (State == GameState.TITLE) {
+			Debug.Log("State already has been changed to " + State);
+			return;
+		}
+
+		this.ResetDarumas(5);
+		this.ResetHammer();
+
+		State = GameState.TITLE;
 	}
 
 	// Update is called once per frame
 	void Update () {
+
+		// Ignore inputs (except GUI) if game is not started.
+		if (State == GameState.TITLE) return;
+		
+		// Update nothing if game is finished.
+		if (State == GameState.CLEARED || State == GameState.OVERED) return;
+
 		// Check game clear & over.
+		// Reset references.
 		GameObject head = GameObject.FindWithTag("DarumaHead");
 		DarumaHeadScript headModel = (DarumaHeadScript)head.GetComponent(typeof(DarumaHeadScript));
 		if (headModel.OnFloor() && headModel.IsStopping()) {
 			if (headModel.IsStanding()) {
 				Debug.Log("Game Cleared !!!");
-				
-				GameObject menu = GameObject.Find("Menu");
-				MenuScript menuModel = (MenuScript) menu.GetComponent(typeof(MenuScript));
-				menuModel.showDialog("Finish", "Game Cleared !!!");
-				
+				State = GameState.CLEARED;
 			} else {
 				Debug.Log("Game Over...");
-				
-				GameObject menu = GameObject.Find("Menu");
-				MenuScript menuModel = (MenuScript) menu.GetComponent(typeof(MenuScript));
-				menuModel.showDialog("Finish", "Game Over...");
+				State = GameState.OVERED;
 			}
+		}
+
+		if (headModel.OutOfScene ()) {
+			Debug.Log("Game Over...");
+			State = GameState.OVERED;
 		}
 
 		// Input touches
@@ -89,28 +114,16 @@ public class GameScript : MonoBehaviour {
 			Touch touch = Input.GetTouch (0);
 			if (touch.phase == TouchPhase.Began) {
 				if (touch.position.x < Screen.width * 0.5f) {
-					Debug.Log("Left side touched up.");
-					this.ResetHammer(HammerDirection.LEFT);
+					this.ResetHammer(HammerScript.Direction.LEFT);
 				} else {
-					Debug.Log("Right side touched up.");
-					this.ResetHammer(HammerDirection.RIGHT);
+					this.ResetHammer(HammerScript.Direction.RIGHT);
 				}
 			}
 		}
 
-		// Input keys (for debug)
-		if (Input.GetKeyUp ("l")) {
-			this.ResetHammer(HammerDirection.RIGHT);
-			return;
-		} else if (Input.GetKeyUp("s")) {
-			this.ResetHammer(HammerDirection.LEFT);
-			return;
-		} else if (Input.GetKeyUp("g")) {
-			this.ResetAll();
-			return;
-		} else if (Input.GetKeyUp("j")) {
-			return;
-		} else if (Input.GetKeyUp("f")) {
+		// Input keys (only for debug)
+		if (Input.GetKeyUp("q")) {
+			this.QuitGame();
 			return;
 		}
 
@@ -141,7 +154,46 @@ public class GameScript : MonoBehaviour {
 		hitDelay = (hitDelay <= 0) ? 0 : hitDelay - 1;
 	}
 
-	Vector3 LowPassFilteredAcceleration() {
+	//
+	// ACTIONS FOR GAME OBJECTS
+	//
+	public void SetHammer(HammerSetPosition position) {
+		switch (position) {
+		case HammerSetPosition.LEFT:
+			this.ResetHammer(HammerScript.Direction.LEFT);
+			break;
+		case HammerSetPosition.RIGHT:
+			this.ResetHammer(HammerScript.Direction.RIGHT);
+			break;
+		default:
+			Debug.Log("Unexpected HammerSetPosition type " + position);
+			break;
+		}
+	}
+
+	public void SwingHammer(HammerSetPosition position, float accelerationX) {
+		hammerModel.Swing(accelerationX);
+	}
+
+	private void ResetDarumas(int gameLevel) {
+		// Reset daruma objects.
+		GameObject darumaCreator = GameObject.Find("DarumaCreator");
+		DarumaCreatorScript darumaCreatorModel = (DarumaCreatorScript)darumaCreator.GetComponent (typeof(DarumaCreatorScript));
+		darumaCreatorModel.DestroyObjects();
+		darumaCreatorModel.CreateObjects(gameLevel);
+	}
+
+	private void ResetHammer(HammerScript.Direction hammerDirection = HammerScript.Direction.RIGHT) {
+		hammerModel.ResetPosition(hammerDirection);
+	}
+
+	//
+	// UTILITIES
+	//
+
+	// Remove noise from the acceleration input
+	// by low-pass filtering it.
+	private Vector3 LowPassFilteredAcceleration() {
 		lowPassValue = Vector3.Lerp (lowPassValue, Input.acceleration, LowPassFilterFactor);
 		return lowPassValue;
 	}

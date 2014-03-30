@@ -15,6 +15,10 @@ public class DarumaHeadScript : MonoBehaviour {
 
 	}
 
+	public bool OutOfScene () {
+		return this.rigidbody.position.y < 0.0f;
+	}
+
 	public bool OnFloor () {
 		return onFloor;
 	}
