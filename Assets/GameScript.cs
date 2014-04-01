@@ -5,6 +5,7 @@ public class GameScript : MonoBehaviour {
 
 	public enum GameState {
 		TITLE,
+		READY,
 		PLAYING,
 		PAUSING,
 		CLEARED,
@@ -16,13 +17,14 @@ public class GameScript : MonoBehaviour {
 	public enum HammerSetPosition {
 		LEFT,
 		RIGHT,
+		NONE,
 	}
 
 	[SerializeField]
 	const int DefaultGameLevel = 7;
 
 	[SerializeField]
-	static float AccelerometerThreshold = 1.0f;
+	float AccelerometerThreshold = 1.0f;
 	
 	static float AccelerometerUpdateInterval = 1.0f / 60.0f;
 	static float LowPassKernelWidthInSeconds = 1.0f;
@@ -58,7 +60,7 @@ public class GameScript : MonoBehaviour {
 		this.ResetDarumas(gameLevel);
 		this.ResetHammer();
 
-		State = GameState.PLAYING;
+		State = GameState.READY;
 	}
 
 	public void PauseGame() {
@@ -86,7 +88,13 @@ public class GameScript : MonoBehaviour {
 
 		// Ignore inputs (except GUI) if game is not started.
 		if (State == GameState.TITLE) return;
-		
+
+		// Begin playing with READY.
+		if (State == GameState.READY) {
+			State = GameState.PLAYING;
+			return;
+		}
+
 		// Update nothing if game is finished.
 		if (State == GameState.CLEARED || State == GameState.OVERED) return;
 
@@ -131,8 +139,13 @@ public class GameScript : MonoBehaviour {
 		Vector3 inputAccel = Input.acceleration;
 		Vector3 lowPassedAccel = LowPassFilteredAcceleration();
 		if (Mathf.Abs(inputAccel.x - lowPassedAccel.x) > AccelerometerThreshold) {
-			hitAccel = inputAccel.x;
-			hitFlag  = true;
+
+			if ((inputAccel.x < 0 && hammerModel.GetFacingDirection() == HammerScript.Direction.LEFT) ||
+			    (inputAccel.x > 0 && hammerModel.GetFacingDirection() == HammerScript.Direction.RIGHT))
+			{
+				hitAccel = inputAccel.x;
+				hitFlag  = true;
+			}
 		}
 
 		// Trigger Hammer Action.
@@ -165,6 +178,8 @@ public class GameScript : MonoBehaviour {
 		case HammerSetPosition.RIGHT:
 			this.ResetHammer(HammerScript.Direction.RIGHT);
 			break;
+		case HammerSetPosition.NONE:
+			break;
 		default:
 			Debug.Log("Unexpected HammerSetPosition type " + position);
 			break;
@@ -173,6 +188,21 @@ public class GameScript : MonoBehaviour {
 
 	public void SwingHammer(HammerSetPosition position, float accelerationX) {
 		hammerModel.Swing(accelerationX);
+	}
+
+	public HammerSetPosition GetHammerPosition() {
+		switch (hammerModel.GetFacingDirection ()) {
+		case HammerScript.Direction.RIGHT:
+			return HammerSetPosition.LEFT;
+			break;
+		case HammerScript.Direction.LEFT:
+			return HammerSetPosition.RIGHT;
+			break;
+		case HammerScript.Direction.NONE:
+		default:
+			return HammerSetPosition.NONE;
+			break;
+		}
 	}
 
 	private void ResetDarumas(int gameLevel) {

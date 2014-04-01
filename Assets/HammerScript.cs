@@ -6,6 +6,7 @@ public class HammerScript : MonoBehaviour {
 	public enum Direction {
 		LEFT,
 		RIGHT,
+		NONE,
 	}
 
 	float forceAmount = 30.0f;
@@ -38,6 +39,22 @@ public class HammerScript : MonoBehaviour {
 				this.transform.position = rightInitPosition;
 				this.transform.rotation = initRotation;
 			break;
+		}
+	}
+
+	public Direction GetFacingDirection () {
+//		float rotationY = this.transform.rotation.y;
+//		if (rotationY > 0.5 && rotationY <= 1.5) {
+//			return Direction.LEFT;
+//		} else {
+//			return Direction.RIGHT;
+//		}
+		if (this.transform.position == leftInitPosition) {
+			return Direction.LEFT;
+		} else if (this.transform.position == rightInitPosition) {
+			return Direction.RIGHT;
+		} else {
+			return Direction.NONE;
 		}
 	}
 
