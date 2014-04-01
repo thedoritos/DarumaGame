@@ -62,6 +62,24 @@ public class MenuScript : MonoBehaviour {
 		// - Quit game button
 		// - Resume game button
 		// - Level information labels
+
+		Rect leftLabelRect = new Rect (22.0f, Screen.height * 0.5f - 44.0f, 44.0f, 44.0f);
+		Rect rightLabelRect = new Rect (Screen.width - 66.0f, leftLabelRect.yMin, leftLabelRect.width, leftLabelRect.height);
+
+		switch (gameModel.GetHammerPosition ()) {
+		case GameScript.HammerSetPosition.LEFT:
+			GUI.Label (leftLabelRect, ">>", defaultStaticStyle);
+			GUI.Label (rightLabelRect, "<<", defaultInteractiveStyle);
+			break;
+		case GameScript.HammerSetPosition.RIGHT:
+			GUI.Label (leftLabelRect, ">>", defaultInteractiveStyle);
+			GUI.Label (rightLabelRect, "<<", defaultStaticStyle);
+			break;
+		default:
+			GUI.Label (leftLabelRect, ">>", defaultStaticStyle);
+			GUI.Label (rightLabelRect, "<<", defaultStaticStyle);
+			break;
+		}
 	}
 
 	private void OnResultGUI () {
