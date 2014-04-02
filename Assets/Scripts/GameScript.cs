@@ -12,7 +12,7 @@ public class GameScript : MonoBehaviour {
 		OVERED,
 	}
 
-	public GameState State { get; private set;}
+	public GameState State { get; private set; }
 
 	public enum HammerSetPosition {
 		LEFT,
@@ -20,15 +20,17 @@ public class GameScript : MonoBehaviour {
 		NONE,
 	}
 
+	// Testing SerializeField with const value.
+	// => Not available to change from the Inspector.
 	[SerializeField]
 	const int DefaultGameLevel = 7;
 
 	[SerializeField]
 	float AccelerometerThreshold = 1.0f;
 	
-	static float AccelerometerUpdateInterval = 1.0f / 60.0f;
-	static float LowPassKernelWidthInSeconds = 1.0f;
-	static float LowPassFilterFactor = AccelerometerUpdateInterval / LowPassKernelWidthInSeconds;
+	const float AccelerometerUpdateInterval = 1.0f / 60.0f;
+	const float LowPassKernelWidthInSeconds = 1.0f;
+	const float LowPassFilterFactor = AccelerometerUpdateInterval / LowPassKernelWidthInSeconds;
 
 	Vector3 lowPassValue;
 	
@@ -194,14 +196,11 @@ public class GameScript : MonoBehaviour {
 		switch (hammerModel.GetFacingDirection ()) {
 		case HammerScript.Direction.RIGHT:
 			return HammerSetPosition.LEFT;
-			break;
 		case HammerScript.Direction.LEFT:
 			return HammerSetPosition.RIGHT;
-			break;
 		case HammerScript.Direction.NONE:
 		default:
 			return HammerSetPosition.NONE;
-			break;
 		}
 	}
 
@@ -220,9 +219,12 @@ public class GameScript : MonoBehaviour {
 	//
 	// UTILITIES
 	//
-
-	// Remove noise from the acceleration input
-	// by low-pass filtering it.
+	
+	/// <summary>
+	/// Remove noise from the acceleration input
+	/// by low-pass filtering it.
+	/// </summary>
+	/// <returns>The pass filtered acceleration.</returns>
 	private Vector3 LowPassFilteredAcceleration() {
 		lowPassValue = Vector3.Lerp (lowPassValue, Input.acceleration, LowPassFilterFactor);
 		return lowPassValue;
